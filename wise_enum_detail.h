@@ -8,14 +8,12 @@ namespace wise_enum {
 
 namespace detail {
 
-template <class T>
-struct value_and_name {
+template <class T> struct value_and_name {
   T value;
-  const char *name;
+  std::string_view name;
 };
 
-template <class T>
-struct Tag {};
+template <class T> struct Tag {};
 
 constexpr void wise_enum_detail_array(...);
 
@@ -25,14 +23,14 @@ static constexpr bool is_wise_enum =
 
 template <class T, std::size_t N, std::size_t... Is>
 constexpr std::array<T, N>
-desc_array_to_array_impl(const std::array<std::pair<T, const char *>, N> &a,
+desc_array_to_array_impl(const std::array<std::pair<T, std::string_view>, N> &a,
                          std::index_sequence<Is...>) {
   return {a[Is].first...};
 }
 
 template <class T, std::size_t N>
 constexpr std::array<T, N>
-desc_array_to_array(const std::array<std::pair<T, const char *>, N> &a) {
+desc_array_to_array(const std::array<std::pair<T, std::string_view>, N> &a) {
   return desc_array_to_array_impl(a, std::make_index_sequence<N>{});
 }
 
@@ -48,8 +46,8 @@ constexpr int strcmp(const char *s1, const char *s2) {
     return 0;
   }
 }
-}
-}
+} // namespace detail
+} // namespace wise_enum
 
 #define WISE_ENUM_IMPL_NARG(...)                                               \
   WISE_ENUM_IMPL_NARG_(__VA_ARGS__, WISE_ENUM_IMPL_RSEQ_N())
@@ -66,7 +64,7 @@ constexpr int strcmp(const char *s1, const char *s2) {
 #define WISE_ENUM_IMPL_CAT(a, ...) WISE_ENUM_IMPL_PRIMITIVE_CAT(a, __VA_ARGS__)
 #define WISE_ENUM_IMPL_PRIMITIVE_CAT(a, ...) a##__VA_ARGS__
 
-#define WISE_ENUM_IMPL_XSTR(s) #s
+#define WISE_ENUM_IMPL_XSTR(s) #s##sv
 #define WISE_ENUM_IMPL_STR(s) WISE_ENUM_IMPL_XSTR(s)
 
 #define WISE_ENUM_IMPL_IIF(c) WISE_ENUM_IMPL_CAT(WISE_ENUM_IMPL_IIF_, c)
@@ -120,9 +118,9 @@ constexpr int strcmp(const char *s1, const char *s2) {
         {loop(WISE_ENUM_IMPL_DESC_PAIR, WISE_ENUM_IMPL_COMMA, __VA_ARGS__)}};  \
   }                                                                            \
                                                                                \
-  constexpr const char *wise_enum_to_string(name e) {                          \
+  constexpr std::string_view wise_enum_to_string(name e) {                     \
     switch (e) {                                                               \
       loop(WISE_ENUM_IMPL_SWITCH_CASE, WISE_ENUM_IMPL_NOTHING, __VA_ARGS__)    \
     }                                                                          \
-    return nullptr;                                                            \
+    return ""sv;                                                               \
   }

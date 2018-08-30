@@ -53,8 +53,7 @@
 namespace wise_enum {
 
 // Returns the string representation of an enumerator
-template <class T>
-constexpr const char *to_string(T t) {
+template <class T> constexpr auto to_string(T t) {
   return wise_enum_to_string(t);
 }
 
@@ -65,8 +64,7 @@ template <class T>
 constexpr auto range = wise_enum_detail_array(detail::Tag<T>{});
 
 // This variable is equal to the number of enumerators for the wise enum type.
-template <class T>
-constexpr std::size_t size = range<T>.size();
+template <class T> constexpr std::size_t size = range<T>.size();
 
 // A type trait; this allows checking if a type is a wise_enum in generic code
 template <class T>
@@ -79,12 +77,11 @@ struct is_wise_enum : std::integral_constant<bool, is_wise_enum_v<T>> {};
 // enumerator has name matching the string, the optional is returned empty.
 template <class T>
 constexpr WISE_ENUM_OPTIONAL<T> from_string(const char *arg) {
-  auto it = std::find_if(range<T>.begin(), range<T>.end(), [=](const auto &x) {
-    return ::wise_enum::detail::strcmp(x.name, arg) == 0;
-  });
+  auto it = std::find_if(range<T>.begin(), range<T>.end(),
+                         [=](const auto &x) { return x.name == arg; });
   if (it == range<T>.end())
     return {};
 
   return it->value;
 }
-}
+} // namespace wise_enum
